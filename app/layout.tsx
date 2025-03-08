@@ -3,6 +3,7 @@ import { Poppins, Inter } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { neobrutalism } from "@clerk/themes";
+import { Toaster } from "@/components/ui/sonner";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -37,6 +38,7 @@ export default function RootLayout({
           className={`${poppins.variable} ${inter.variable} antialiased`}
         >
           {children}
+          <Toaster/>
         </body>
       </html>
     </ClerkProvider>
