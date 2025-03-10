@@ -9,7 +9,7 @@ const layout = ({children}: {children: React.ReactNode}) => {
         <AppSidebar/>
 
         <SidebarInset>
-            <div className='hidden lg:flex'>
+            <div className='w-fit flex items-center gap-2 px-4 my-4 lg:flex'>
                 <SidebarTrigger/>
             </div>
             

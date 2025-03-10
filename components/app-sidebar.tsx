@@ -1,5 +1,3 @@
-"use client"
-
 import * as React from "react"
 import {
   Settings2,
@@ -24,59 +22,28 @@ import {
 } from "@/components/ui/sidebar"
 import Image from "next/image"
 import { redirect } from "next/dist/server/api-utils"
-
-// This is sample data.
-const data =[
-  {
-    title: 'Dashboard',
-    url: '/dashboard',
-    icon: SquareTerminal,
-  },
-  {
-    title: 'Image Generator',
-    url: '/image-generator',
-    icon: ImageIcon,
-    
-  },
-  {
-    title: 'My Models',
-    url: '/my-models',
-    icon: FrameIcon,
-    
-  },
-  {
-    title: 'Train your Model',
-    url: '/model-training',
-    icon: ImageIcon,
-    
-  },
-  {
-    title: 'My Images',
-    url: '/my-images',
-    icon: Images,
-  },
-  {
-    title: 'Billing',
-    url: '/billing',
-    icon: CreditCard,
-  },
-  {
-    title: 'Settings',
-    url: '/settings',
-    icon: Settings2,
-  },
-  
-  
-]
+import { createClient } from "@/lib/supabase/server"
 
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export async function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const supabase = await createClient();
+  const { data: userData } = await supabase.auth.getSession();
+
+  console.log(userData);
+
+  const user = {
+    name: userData?.session?.user.user_metadata?.fullname,
+    email: userData?.session?.user.user_metadata?.email,
+    avatar: userData?.session?.user.user_metadata?.avatar_url
+  }
+
+  console.log(user);
+
   return (
     <Sidebar  collapsible="icon" {...props} >
 
       <SidebarHeader >
         <SidebarMenuButton
-              onClick={() => {}}
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground cursor-pointer"
             >
@@ -91,10 +58,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
 
       <SidebarContent>
-        <NavMain items={data} />
+        <NavMain/>
       </SidebarContent>
       <SidebarFooter>
-        {/* <NavUser user={data.user} /> */}
+        <NavUser user={user} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
