@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react'
+import React, { useEffect } from 'react'
 import { z } from 'zod';
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -30,7 +30,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { Info } from 'lucide-react';
-import { generateImage } from '@/app/actions/image';
+import { useGeneratedStore } from '@/hooks/useGeneratedStore';
 
 
 export const ImageGenerationFormSchema = z.object({
@@ -65,6 +65,7 @@ export const ImageGenerationFormSchema = z.object({
 });
 
 const ImageConfig = () => {
+    const generateImage = useGeneratedStore((state) => state.generateImage)
     const form = useForm<z.infer<typeof ImageGenerationFormSchema>>({
         resolver: zodResolver(ImageGenerationFormSchema),
         defaultValues: {
@@ -79,17 +80,32 @@ const ImageConfig = () => {
         },
       })
 
-      async function onSubmit(values: z.infer<typeof ImageGenerationFormSchema>) {
-        const { error, success, data } = await generateImage(values);
-        console.log(error, success, data);
-        console.log(values)
-      }
+    useEffect(() => {
+      const subscription = form.watch((value, { name }) => {
+        if(name === 'model'){
+          let newSteps;
+
+          (value.model === 'black-forest-labs/flux-schnell') ? newSteps=4  : newSteps=28;
+          
+          if(newSteps !== undefined) {
+            form.setValue('num_inference_steps', newSteps);
+          }
+        }
+      })
+
+      return () => subscription.unsubscribe()
+    }, [form])
+
+    async function onSubmit(values: z.infer<typeof ImageGenerationFormSchema>) {
+            await generateImage(values);
+    }  
+
   return (
-    <div >
+    <div className="w-full md:w-auto" >
       <TooltipProvider>
         <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <fieldset className='grid gap-6 p-6 bg-background rounded-lg border-black border-2 shadow-[6px_6px_0px_rgba(0,0,0,0.8)]'>
+      <fieldset className='grid gap-4 p-4 md:p-6 bg-background rounded-lg border-black border-2 shadow-[6px_6px_0px_rgba(0,0,0,0.8)]'>
             <legend className='text-sm px-1 ml-1 '>
                 Input
             </legend>
@@ -225,7 +241,7 @@ const ImageConfig = () => {
                 </span>
               </FormLabel>
               <FormControl>
-                <Slider defaultValue={[field.value]} max={50} min={0} onValueChange={(e) => form.setValue('num_inference_steps', e[0])} step={1} />
+                <Slider defaultValue={[field.value]} max={form.getValues('model') === 'black-forest-labs/flux-schnell' ? 4 : 50} min={0} onValueChange={(e) => form.setValue('num_inference_steps', e[0])} step={1} />
               </FormControl>
               <FormMessage />
             </FormItem>

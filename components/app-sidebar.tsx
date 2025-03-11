@@ -29,15 +29,11 @@ export async function AppSidebar({ ...props }: React.ComponentProps<typeof Sideb
   const supabase = await createClient();
   const { data: userData } = await supabase.auth.getSession();
 
-  console.log(userData);
-
   const user = {
     name: userData?.session?.user.user_metadata?.fullname,
     email: userData?.session?.user.user_metadata?.email,
     avatar: userData?.session?.user.user_metadata?.avatar_url
   }
-
-  console.log(user);
 
   return (
     <Sidebar  collapsible="icon" {...props} >
