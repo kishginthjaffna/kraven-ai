@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/tooltip"
 import { Info } from 'lucide-react';
 import { useGeneratedStore } from '@/hooks/useGeneratedStore';
+import { Tables } from '@/database.types';
 
 
 export const ImageGenerationFormSchema = z.object({
@@ -64,12 +65,17 @@ export const ImageGenerationFormSchema = z.object({
       }),
 });
 
-const ImageConfig = () => {
+interface ConfigurationProps{
+  userModels: Tables<'models'>[],
+  model_id?: string
+}
+
+const ImageConfig = ({userModels, model_id}: ConfigurationProps) => {
     const generateImage = useGeneratedStore((state) => state.generateImage)
     const form = useForm<z.infer<typeof ImageGenerationFormSchema>>({
         resolver: zodResolver(ImageGenerationFormSchema),
         defaultValues: {
-          model: 'black-forest-labs/flux-dev',
+          model: model_id ? `kishginthjaffna/${model_id}` : 'black-forest-labs/flux-dev',
           prompt: '',
           guidance: 3.5,
           num_outputs: 1,
@@ -97,7 +103,16 @@ const ImageConfig = () => {
     }, [form])
 
     async function onSubmit(values: z.infer<typeof ImageGenerationFormSchema>) {
-            await generateImage(values);
+      const newValues = {
+        ...values,
+        prompt: values.model.startsWith("kishginthjaffna/") ? (() => {
+          const modelId = values.model.replace('kishginthjaffna/', '').split(':')[0];
+          const selectedModel = userModels.find((model) => model.model_id === modelId);
+
+          return `photo of a ${selectedModel?.trigger_word || 'tvktv'} ${selectedModel?.gender}, ${values.prompt}`
+        })() : values.prompt
+      }
+            await generateImage(newValues);
     }  
 
   return (
@@ -134,6 +149,7 @@ const ImageConfig = () => {
                 <SelectContent>
                   <SelectItem value="black-forest-labs/flux-dev">black-forest-labs/flux-dev</SelectItem>
                   <SelectItem value="black-forest-labs/flux-schnell">black-forest-labs/flux-schnell</SelectItem>
+                  {userModels?.map((model) => model.training_status === 'succeeded' && <SelectItem key={model.id} value={`kishginthjaffna/${model.model_id}:${model.version}`}>{model.model_name}</SelectItem>)}
                 </SelectContent>
               </Select>
               <FormMessage />

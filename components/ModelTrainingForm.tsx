@@ -87,6 +87,7 @@ const ModelTrainingForm = () => {
             formData.append("fileKey", res.Key);
             formData.append("modelName", values.modelName);
             formData.append("gender", values.gender);
+            toast.loading('Initiating model training...', { id: toastId, duration: 5000 });
 
             //Training handler
             const response = await fetch('/api/training', {

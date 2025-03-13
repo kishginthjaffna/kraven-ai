@@ -1,14 +1,13 @@
-import { create } from 'zustand';
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 import Replicate from "replicate";
 
 const replicate = new Replicate({
-    auth: process.env.REPLICATE_API_TOKEN
+  auth: process.env.REPLICATE_API_TOKEN,
 });
 
-const WEBHOOK_URL = process.env.SITE_URL ??  'https://e747-2402-d000-8140-751-fd23-1b38-1209-d46d.ngrok-free.app';
+const WEBHOOK_URL = process.env.SITE_URL ??  'https://c7b1-2402-d000-8140-26b3-ec19-120f-b57e-2a44.ngrok-free.app';
 
 export async function POST(request: NextRequest) {
     try {
@@ -46,10 +45,13 @@ export async function POST(request: NextRequest) {
 
         try {
             // Create model on Replicate
-            await replicate.models.create(process.env.NEXT_PUBLIC_REPLICATE_USER_NAME || 'default_user', modelId, {
+            await replicate.models.create('kishginthjaffna', modelId, {
                 visibility: "private",
                 hardware: "gpu-a100-large"
             });
+
+            const webhookUrl = `${WEBHOOK_URL}/api/webhooks/training?userId=${user.id}&modelName=${encodeURIComponent(input.modelName)}&fileName=${encodeURIComponent(fileName)}`;
+            console.log("Webhook URL:", webhookUrl);
 
             // Start training
             const training = await replicate.trainings.create(
@@ -57,17 +59,30 @@ export async function POST(request: NextRequest) {
                 "flux-dev-lora-trainer",
                 "b6af14222e6bd9be257cbc1ea4afda3cd0503e1133083b9d1de0364d8568e6ef",
                 {
-                    destination: `${process.env.NEXT_PUBLIC_REPLICATE_USER_NAME || 'default_user'}/${modelId}`,
+                    destination: `kishginthjaffna/${modelId}`,
                     input: {
                         steps: 1000,
                         resolution: "1024",
                         input_images: fileUrl,
                         trigger_word: "tvktv",
                     },
-                    webhook: `${WEBHOOK_URL}/api/webhooks/training`,
+                    webhook: webhookUrl,
                     webhook_events_filter: ["completed"], 
                 }
             );
+            
+
+            //add model to supabase
+            await supabaseAdmin.from("models").insert({ 
+                model_id: modelId, 
+                user_id: user.id,
+                model_name: input.modelName,
+                gender: input.gender,
+                training_status: training.status,
+                trigger_word: "tvktv",
+                training_steps: 1200,
+                training_id: training.id,
+            });
 
             return NextResponse.json({ success: true }, { status: 200 });
 
