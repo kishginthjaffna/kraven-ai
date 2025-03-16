@@ -210,7 +210,7 @@ const ModelTrainingForm = () => {
                     
                 </form>
             </Form>
-          <div className="relative hidden bg-orange-700 md:block">
+          <div className="relative hidden bg-orange-700/80 md:block">
             <Image src="/images/AI-1.png" alt="Image" className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale" width={400} height={500}/>
           </div>
         </CardContent>

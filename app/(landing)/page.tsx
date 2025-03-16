@@ -1,25 +1,19 @@
-import { Button } from '@/components/ui/button'
-import Link from 'next/link'
+import Pricing from '@/components/Landing page/Pricing'
+import { getProducts, getUser } from '@/lib/supabase/queries'
+import { createClient } from '@/lib/supabase/server'
 import React from 'react'
 
-const page = () => {
-  return (
-    <div>
-      Landing page
-      <div>
-        <Link href="/sign-in">
-            <Button className='bg-orange-700 hover:bg-orange-800 hover:cursor-pointer'>
-                Login
-            </Button>
-        </Link>
+const page = async () => {
+  const supabase = await createClient();
+  const [user, products] = await Promise.all([
+    getUser(supabase), //get currently auhtenticated user
+    getProducts(supabase), //get all products with prices
+  ]);
 
-        <Link href="/sign-up">
-            <Button className='bg-orange-700 hover:bg-orange-800 hover:cursor-pointer'>
-                Register
-            </Button>
-        </Link>
-      </div>
-    </div>
+  return (
+    <main className='flex flex-col min-h-screen items-center justify-center'>
+      <Pricing products={products ?? []}/>
+    </main>
   )
 }
 

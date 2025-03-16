@@ -1,4 +1,3 @@
-import { error } from 'console';
 'use server'
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";

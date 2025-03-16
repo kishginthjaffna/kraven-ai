@@ -7,8 +7,21 @@ const replicate = new Replicate({
   auth: process.env.REPLICATE_API_TOKEN,
 });
 
-const WEBHOOK_URL = process.env.SITE_URL ??  'https://c7b1-2402-d000-8140-26b3-ec19-120f-b57e-2a44.ngrok-free.app';
+const WEBHOOK_URL = process.env.SITE_URL ??  'https://71c2-2402-d000-8140-26b3-ec19-120f-b57e-2a44.ngrok-free.app';
 
+async function validateUserCredits(userId: string) {
+    const {data: userCredits, error} = await supabaseAdmin.from('credits').select('*').eq('user_id', userId).single();
+    if(error){
+        throw new Error('Error getting user credits in validateUserCredits');
+    }
+
+    const credits = userCredits?.model_training_count ?? 0;
+    if (credits <= 0) {
+        throw new Error("Not enough credits for model training");
+    }
+
+    return credits;
+}
 export async function POST(request: NextRequest) {
     try {
         if (!process.env.REPLICATE_API_TOKEN) {
@@ -24,14 +37,16 @@ export async function POST(request: NextRequest) {
 
         const formData = await request.formData();
         const input = {
-            fileKey: formData.get("fileKey") as string,
-            modelName: formData.get("modelName") as string,
-            gender: formData.get("gender") as string,
+        fileKey: formData.get("fileKey") as string,
+        modelName: formData.get("modelName") as string,
+        gender: formData.get("gender") as "man" | "woman",
         };
 
         if (!input.fileKey || !input.modelName || !input.gender) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
         }
+
+        const oldCredits = await validateUserCredits(user?.id);
 
         const fileName = input.fileKey.replace("training_data/", "");
         const { data } = await supabaseAdmin.storage.from("training_data").createSignedUrl(fileName, 3600);
@@ -83,6 +98,11 @@ export async function POST(request: NextRequest) {
                 training_steps: 1200,
                 training_id: training.id,
             });
+
+            //Updating credits
+            await supabaseAdmin.from('credits').update({ model_training_count: oldCredits - 1 }).eq('user_id', user.id);
+
+
 
             return NextResponse.json({ success: true }, { status: 200 });
 

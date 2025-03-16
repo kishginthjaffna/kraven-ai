@@ -21,6 +21,8 @@ interface ImageProps {
     onClose: () => void
 }
 
+const replicateUsername = process.env.NEXT_PUBLIC_REPLICATE_USER_NAME;
+
 const ImageDialog = ({ image, onClose }: ImageProps) => {
     const downloadImage = () => {
         fetch(image.url || "").then((res) => res.blob()).then((blob) => {
@@ -59,13 +61,10 @@ const ImageDialog = ({ image, onClose }: ImageProps) => {
                                 className="w-full h-auto flex mb-3 rounded"
                             />
                             <div className="flex absolute top-1 right-1 gap-2">
-                                <Button className="cursor-pointer bg-orange-700 w-fit" onClick={downloadImage}>
-                                    <Download />
+                                <Button className="cursor-pointer rounded-full bg-orange-700 w-fit" onClick={downloadImage}>
+                                    Download <Download /> 
                                 </Button>
-                                <DeleteImage imageId={image.id.toString()} onDelete={onClose} className='' imageName={image.image_name ?? ''}/>
-                                <Button className="cursor-pointer bg-orange-700 w-fit">
-                                    <Share />
-                                </Button>
+                                <DeleteImage imageId={image.id.toString()} onDelete={onClose} className='rounded-full' imageName={image.image_name ?? ''}/>
                             </div>
                             <hr className="inline-block w-full border-primary/30 mb-2" />
                         </div>
@@ -76,9 +75,6 @@ const ImageDialog = ({ image, onClose }: ImageProps) => {
                         </p>
 
                         <div className="flex flex-wrap gap-3">
-                            <Badge variant={"secondary"} className="rounded-full border border-primary/30 px-4 py-2 text-sm font-normal">
-                                <span className="font-semibold text-primary uppercase mr-2">Model </span> {image.model}
-                            </Badge>
                             <Badge variant={"secondary"} className="rounded-full border border-primary/30 px-4 py-2 text-sm font-normal">
                                 <span className="font-semibold text-primary uppercase mr-2">Dimension </span> {image.width} x {image.height}
                             </Badge>

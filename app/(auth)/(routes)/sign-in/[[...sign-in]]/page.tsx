@@ -31,7 +31,10 @@ const formSchema = z.object({
     })
 })
 
-const Page = () => {
+
+
+const Page = async () => {
+    
     const [loading, setLoading] = useState(false);
 
     const form = useForm<z.infer<typeof formSchema>>({

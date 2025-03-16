@@ -70,7 +70,7 @@ export async function POST(req: Request) {
                 training_status: body.status,
                 training_time: body.metrics?.total_time ?? null,
                 version: body.output?.version.split(":")[1] ?? null,
-             }).eq('user_id', userId).eq('model_name', modelName);
+             }).eq('user_id', userId as string).eq('model_name', modelName as string);
         } else {
             //send a failure email
             await resend.emails.send({
@@ -83,8 +83,14 @@ export async function POST(req: Request) {
             //update user metadata
             await supabaseAdmin.from('models').update({ 
                 training_status: body.status,
-             }).eq('user_id', userId).eq('model_name', modelName);
+             }).eq('user_id', userId as string).eq('model_name', modelName as string);
 
+             //Getting old credits
+             const {data: oldCredits, error} = await supabaseAdmin.from('credits').select('model_training_count').eq('user_id', userId!).single();
+
+             if(error) throw new Error('Error getting user credits in training webhook');
+             //Updating credits
+             await supabaseAdmin.from('credits').update({model_training_count: oldCredits?.model_training_count! + 1}).eq('user_id', userId!).single();
         }
 
         //Delete training data

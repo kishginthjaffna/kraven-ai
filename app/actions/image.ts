@@ -8,6 +8,7 @@ import { Database } from '@/database.types';
 import { imageMeta } from "image-meta";
 import { randomUUID } from 'crypto';
 import { toast } from 'sonner';
+import { getCredits } from './credits';
 
 interface ImageProps {
     error: string | null;
@@ -25,6 +26,16 @@ export async function generateImageAction(input : z.infer<typeof ImageGeneration
     if(!process.env.REPLICATE_API_TOKEN){
         return {
             error: 'Replicate API token not found',
+            success: false,
+            data: null
+        }
+    }
+
+    const {data: credits} = await getCredits();
+
+    if(!credits?.image_generation_count || credits.image_generation_count <= 0) {
+        return {
+            error: 'You have reached your image generation limit',
             success: false,
             data: null
         }
