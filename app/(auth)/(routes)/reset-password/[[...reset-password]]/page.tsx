@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useId } from 'react';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -14,9 +14,10 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import Link from 'next/link';
+import { resetPassword } from '@/app/actions/auth';
+import { toast } from 'sonner';
 
 const passwordValidation = new RegExp(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/);
 
@@ -34,9 +35,22 @@ const Page = () => {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
+  const toastId = useId();
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    toast.loading('Sending password reset mail to your email...', {id: toastId, duration: 5000 });
+    try {
+      const { success, error } = await resetPassword({email: values.email || ''});
+  
+      if (success) {
+        toast.success('Password reset mail sent successfully!', { id: toastId, duration: 5000 });
+      } else {
+        toast.error(error || 'Error in sending mail', { id: toastId, duration: 5000 });
+      }
+    } catch (error: any) {
+      console.error('Error in resetting password:', error);
+      toast.error('Something went wrong. Please try again.', { id: toastId, duration: 5000 });
+    }
   }
 
   return (
