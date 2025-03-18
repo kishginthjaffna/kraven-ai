@@ -33,7 +33,7 @@ const formSchema = z.object({
 
 
 
-const Page = async () => {
+const Page = () => {
     
     const [loading, setLoading] = useState(false);
 
@@ -45,14 +45,15 @@ const Page = async () => {
         },
       })
 
+    // Client-side onSubmit
     async function onSubmit(values: z.infer<typeof formSchema>) {
         setLoading(true);
+        console.log("Form Data:", values); // Debug the form values
+        
+        const { email, password } = values;
+        const { success, error } = await signIn({ email, password });
 
-        const formData = new FormData();
-        formData.append('email', values.email);
-        formData.append('password', values.password);
-
-        const { success, error } = await signIn(formData);
+        console.log("SignIn Response:", { success, error });
 
         if (!success) {
             toast.error(error);
@@ -63,6 +64,9 @@ const Page = async () => {
             redirect('/dashboard');
         }
     }
+
+    
+    
     
     return (
         <div className='w-full max-w-md p-6 sm:p-8 space-y-6 rounded-lg border-black border-2 shadow-[6px_6px_0px_rgba(0,0,0,0.8)] mx-auto'>

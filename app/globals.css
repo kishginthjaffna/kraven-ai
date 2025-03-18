@@ -15,6 +15,74 @@ html, body,
   }
 }
 
+/* Define the keyframe for the shiny effect */
+@keyframes shiny-text {
+  0% {
+    background-position: 0% 0%;
+  }
+  50% {
+    background-position: 100% 0%;
+  }
+  100% {
+    background-position: 0% 0%;
+  }
+}
+
+/* Apply the animation to a class */
+.animate-shiny-text {
+  animation: shiny-text 3s cubic-bezier(0.6, 0.6, 0, 1) infinite;
+}
+
+/* Define the keyframes for horizontal marquee */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(-100% - var(--gap)));
+  }
+}
+
+/* Define the keyframes for vertical marquee */
+@keyframes marquee-vertical {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(calc(-100% - var(--gap)));
+  }
+}
+
+/* Horizontal marquee animation */
+.animate-marquee {
+  animation: marquee var(--duration) linear infinite;
+}
+
+/* Vertical marquee animation */
+.animate-marquee-vertical {
+  animation: marquee-vertical var(--duration) linear infinite;
+}
+
+/* Pause animation on hover */
+.group:hover .animate-marquee,
+.group:hover .animate-marquee-vertical {
+  animation-play-state: paused;
+}
+
+/* Reverse the direction of the animation */
+[animation-direction="reverse"] {
+  animation-direction: reverse;
+}
+
+/* Reverse direction of the animation */
+.reverse-animation {
+  animation-direction: reverse;
+}
+
+
+
+
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

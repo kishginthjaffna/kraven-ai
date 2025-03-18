@@ -1,3 +1,4 @@
+
 import AccountForm from '@/components/Settings/AccountForm'
 import SecuritySettings from '@/components/Settings/SecuritySettings'
 import { getUser } from '@/lib/supabase/queries';
@@ -12,6 +13,8 @@ async function page() {
   if (!user) {
     return redirect('/sign-in');
   }
+
+  
 
   return (
     <section className='container mx-auto space-y-8'>

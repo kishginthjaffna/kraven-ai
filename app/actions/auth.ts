@@ -31,18 +31,17 @@ export async function signUp(formData: FormData): Promise<AuthResponse> {
     };
 }
 
-export async function signIn(formData: FormData): Promise<AuthResponse> {
+// Server-side signIn function
+export async function signIn({ email, password }: { email: string; password: string }): Promise<AuthResponse> {
     const supabase = await createClient();
-
-    const { email, password} = Object.fromEntries(formData) as {
-        email: string;
-        password: string;
-    };
+    console.log("Server-side SignIn:", { email, password });  // Debug server-side data
 
     const { data: signInData, error } = await supabase.auth.signInWithPassword({
         email,
         password,
     });
+
+    console.log("SignIn Data:", { signInData, error });  // Check response from Supabase
 
     return {
         error: error?.message || 'Error in signing you in!',
@@ -50,6 +49,8 @@ export async function signIn(formData: FormData): Promise<AuthResponse> {
         success: !error,
     };
 }
+
+
 
 export async function signOut() {
     const supabase = await createClient();
